@@ -2,6 +2,8 @@
 import cv2
 from cvzone.FaceDetectionModule import FaceDetector
 import pyfirmata
+from pyfirmata import util
+import time
 import numpy as np
 
 cap = cv2.VideoCapture(0)
@@ -10,16 +12,20 @@ cap.set(3, ws)
 cap.set(4, hs)
 
 if not cap.isOpened():
-    print("Camera couldn't Access!!!")
+    print("Camera couldn't be accessed!!!")
     exit()
 
 
-port = "COM11"
+port = "COM3"
 board = pyfirmata.Arduino(port)
+
+it = util.Iterator(board)
+it.start()
+time.sleep(3)
 servo_pinX = board.get_pin('d:9:s') #pin 9 Arduino
 servo_pinY = board.get_pin('d:10:s') #pin 10 Arduino
 
-detector = FaceDetector()
+detector = FaceDetector()   
 servoPos = [90, 90] # initial servo position
 
 while True:
@@ -45,7 +51,6 @@ while True:
         servoPos[0] = servoX
         servoPos[1] = servoY
 
-
         cv2.circle(img, (fx, fy), 80, (0, 0, 255), 2)
         cv2.putText(img, str(pos), (fx+15, fy-15), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2 )
         cv2.line(img, (0, fy), (ws, fy), (0, 0, 0), 2)  # x line
@@ -67,7 +72,5 @@ while True:
     servo_pinX.write(servoPos[0])
     servo_pinY.write(servoPos[1])
     
-    
-
     cv2.imshow("Image", img)
     cv2.waitKey(1)
